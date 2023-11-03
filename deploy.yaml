@@ -1,0 +1,440 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: "twiter"
+Transform: 'AWS::Serverless-2016-10-31'
+Resources:
+
+  UserDynamoDBTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      AttributeDefinitions:
+        - AttributeName: "userName"
+          AttributeType: "S"
+        - AttributeName: "email"
+          AttributeType: "S"
+        - AttributeName: "password"
+          AttributeType: "S"
+        - AttributeName: "nombre"
+          AttributeType: "S"
+      KeySchema:
+        - AttributeName: "userName"
+          KeyType: "String"
+      ProvisionedThroughput:
+        ReadCapacityUnits: "5"
+        WriteCapacityUnits: "5"
+      TableName: "User"
+      GlobalSecondaryIndexes:
+        - IndexName: "emailKey"
+          KeySchema:
+            - AttributeName: "email"
+              KeyType: "String"
+          Projection:
+            ProjectionType: "KEYS_ONLY"
+          ProvisionedThroughput:
+            ReadCapacityUnits: "5"
+            WriteCapacityUnits: "5"
+
+  TweetDynamoDBTable:
+    Type: AWS::DynamoDB::Table
+    DependsOn: "UserDynamoDBTable"
+    Properties:
+      AttributeDefinitions:
+        - AttributeName: "idTweet"
+          AttributeType: "S"
+        - AttributeName: "userName"
+          AttributeType: "S"
+        - AttributeName: "comment"
+          AttributeType: "S"
+        - AttributeName: "date"
+          AttributeType: "S"
+      KeySchema:
+        - AttributeName: "idTweet"
+          KeyType: "Hash"
+      ProvisionedThroughput:
+        ReadCapacityUnits: "5"
+        WriteCapacityUnits: "5"
+      TableName: "Tweet"
+
+  TweetCommentDynamoDBTable:
+    Type: AWS::DynamoDB::Table
+    DependsOn: [ "UserDynamoDBTable",  "TweetDynamoDBTable" ]
+    Properties:
+      AttributeDefinitions:
+        - AttributeName: "idComment"
+          AttributeType: "S"
+        - AttributeName: "idTweet"
+          AttributeType: "S"
+        - AttributeName: "userName"
+          AttributeType: "S"
+        - AttributeName: "comment"
+          AttributeType: "S"
+        - AttributeName: "date"
+          AttributeType: "S"
+      KeySchema:
+        - AttributeName: "idComment"
+          KeyType: "Hash"
+      ProvisionedThroughput:
+        ReadCapacityUnits: "5"
+        WriteCapacityUnits: "5"
+      TableName: "TweetComment"
+
+  TweetUserReactionDynamoDBTable:
+    Type: AWS::DynamoDB::Table
+    DependsOn: [ "UserDynamoDBTable",  "TweetDynamoDBTable" ]
+    Properties:
+      AttributeDefinitions:
+        - AttributeName: "idTweet"
+          AttributeType: "S"
+        - AttributeName: "userName"
+          AttributeType: "S"
+        - AttributeName: "reaction"
+          AttributeType: "S"
+        - AttributeName: "date"
+          AttributeType: "S"
+      KeySchema:
+        - AttributeName: "idTweet"
+          KeyType: "Hash"
+        - AttributeName: "userName"
+          KeyType: "String"
+      ProvisionedThroughput:
+        ReadCapacityUnits: "5"
+        WriteCapacityUnits: "5"
+      TableName: "TweetUserReaction"
+
+
+  CreateUserHandler:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: 'arn:aws:s3:::testtwittertest/AYGO-ARCHITECTURE-OF-MASSIVELY-DISTRIBUTED-APPLICATIONS-1.0-SNAPSHOT-shaded.jar'
+      FunctionName: CreateUserHandler
+      MemorySize: 512
+      Handler: co.edu.escuelaing.twitter.handler.user.CreateUserHandler
+      Role: 'arn:aws:iam::275101086977:role/LabRole'
+      Timeout: 20
+      Runtime: java11
+      Policies:
+        - AWSLambdaBasicExecutionRole
+        - AWSLambda_ReadOnlyAccess
+        - AWSXrayWriteOnlyAccess
+        - AWSLambdaVPCAccessExecutionRole
+
+  DeleteUserHandler:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: 'arn:aws:s3:::testtwittertest/AYGO-ARCHITECTURE-OF-MASSIVELY-DISTRIBUTED-APPLICATIONS-1.0-SNAPSHOT-shaded.jar'
+      FunctionName: DeleteUserHandler
+      MemorySize: 512
+      Handler: co.edu.escuelaing.twitter.handler.user.DeleteUserHandler
+      Role: 'arn:aws:iam::275101086977:role/LabRole'
+      Timeout: 20
+      Runtime: java11
+      Policies:
+        - AWSLambdaBasicExecutionRole
+        - AWSLambda_ReadOnlyAccess
+        - AWSXrayWriteOnlyAccess
+        - AWSLambdaVPCAccessExecutionRole
+
+  GetUser:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: 'arn:aws:s3:::testtwittertest/AYGO-ARCHITECTURE-OF-MASSIVELY-DISTRIBUTED-APPLICATIONS-1.0-SNAPSHOT-shaded.jar'
+      FunctionName: GetUserHandler
+      MemorySize: 512
+      Handler: co.edu.escuelaing.twitter.handler.user.GetUserHandler
+      Role: 'arn:aws:iam::275101086977:role/LabRole'
+      Timeout: 20
+      Runtime: java11
+      Policies:
+        - AWSLambdaBasicExecutionRole
+        - AWSLambda_ReadOnlyAccess
+        - AWSXrayWriteOnlyAccess
+        - AWSLambdaVPCAccessExecutionRole
+
+  ListUserHandler:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: 'arn:aws:s3:::testtwittertest/AYGO-ARCHITECTURE-OF-MASSIVELY-DISTRIBUTED-APPLICATIONS-1.0-SNAPSHOT-shaded.jar'
+      FunctionName: ListUserHandler
+      MemorySize: 512
+      Handler: co.edu.escuelaing.twitter.handler.user.ListUserHandler
+      Role: 'arn:aws:iam::275101086977:role/LabRole'
+      Timeout: 20
+      Runtime: java11
+      Policies:
+        - AWSLambdaBasicExecutionRole
+        - AWSLambda_ReadOnlyAccess
+        - AWSXrayWriteOnlyAccess
+        - AWSLambdaVPCAccessExecutionRole
+
+  CreateTweetHandler:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: 'arn:aws:s3:::testtwittertest/AYGO-ARCHITECTURE-OF-MASSIVELY-DISTRIBUTED-APPLICATIONS-1.0-SNAPSHOT-shaded.jar'
+      FunctionName: CreateTweetHandler
+      MemorySize: 512
+      Handler: co.edu.escuelaing.twitter.handler.tweet.CreateTweetHandler
+      Role: 'arn:aws:iam::275101086977:role/LabRole'
+      Timeout: 20
+      Runtime: java11
+      Policies:
+        - AWSLambdaBasicExecutionRole
+        - AWSLambda_ReadOnlyAccess
+        - AWSXrayWriteOnlyAccess
+        - AWSLambdaVPCAccessExecutionRole
+
+  DeleteTweet:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: 'arn:aws:s3:::testtwittertest/AYGO-ARCHITECTURE-OF-MASSIVELY-DISTRIBUTED-APPLICATIONS-1.0-SNAPSHOT-shaded.jar'
+      FunctionName: DeleteTweetHandler
+      MemorySize: 512
+      Handler: co.edu.escuelaing.twitter.handler.tweet.DeleteTweetHandler
+      Role: 'arn:aws:iam::275101086977:role/LabRole'
+      Timeout: 20
+      Runtime: java11
+      Policies:
+        - AWSLambdaBasicExecutionRole
+        - AWSLambda_ReadOnlyAccess
+        - AWSXrayWriteOnlyAccess
+        - AWSLambdaVPCAccessExecutionRole
+
+  GetTweetHandler:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: 'arn:aws:s3:::testtwittertest/AYGO-ARCHITECTURE-OF-MASSIVELY-DISTRIBUTED-APPLICATIONS-1.0-SNAPSHOT-shaded.jar'
+      FunctionName: GetTweetHandler
+      MemorySize: 512
+      Handler: co.edu.escuelaing.twitter.handler.tweet.GetTweetHandler
+      Role: 'arn:aws:iam::275101086977:role/LabRole'
+      Timeout: 20
+      Runtime: java11
+      Policies:
+        - AWSLambdaBasicExecutionRole
+        - AWSLambda_ReadOnlyAccess
+        - AWSXrayWriteOnlyAccess
+        - AWSLambdaVPCAccessExecutionRole
+
+  ListTweetHandler:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: 'arn:aws:s3:::testtwittertest/AYGO-ARCHITECTURE-OF-MASSIVELY-DISTRIBUTED-APPLICATIONS-1.0-SNAPSHOT-shaded.jar'
+      FunctionName: ListTweetHandler
+      MemorySize: 512
+      Handler: co.edu.escuelaing.twitter.handler.tweet.ListTweetHandler
+      Role: 'arn:aws:iam::275101086977:role/LabRole'
+      Timeout: 20
+      Runtime: java11
+      Policies:
+        - AWSLambdaBasicExecutionRole
+        - AWSLambda_ReadOnlyAccess
+        - AWSXrayWriteOnlyAccess
+        - AWSLambdaVPCAccessExecutionRole
+
+  CreateTweetCommentHandler:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: 'arn:aws:s3:::testtwittertest/AYGO-ARCHITECTURE-OF-MASSIVELY-DISTRIBUTED-APPLICATIONS-1.0-SNAPSHOT-shaded.jar'
+      FunctionName: CreateTweetCommentHandler
+      MemorySize: 512
+      Handler: co.edu.escuelaing.twitter.handler.tweetComment.CreateTweetCommentHandler
+      Role: 'arn:aws:iam::275101086977:role/LabRole'
+      Timeout: 20
+      Runtime: java11
+      Policies:
+        - AWSLambdaBasicExecutionRole
+        - AWSLambda_ReadOnlyAccess
+        - AWSXrayWriteOnlyAccess
+        - AWSLambdaVPCAccessExecutionRole
+
+  DeleteTweetCommentHandler:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: 'arn:aws:s3:::testtwittertest/AYGO-ARCHITECTURE-OF-MASSIVELY-DISTRIBUTED-APPLICATIONS-1.0-SNAPSHOT-shaded.jar'
+      FunctionName: DeleteTweetCommentHandler
+      MemorySize: 512
+      Handler: co.edu.escuelaing.twitter.handler.tweetComment.DeleteTweetCommentHandler
+      Role: 'arn:aws:iam::275101086977:role/LabRole'
+      Timeout: 20
+      Runtime: java11
+      Policies:
+        - AWSLambdaBasicExecutionRole
+        - AWSLambda_ReadOnlyAccess
+        - AWSXrayWriteOnlyAccess
+        - AWSLambdaVPCAccessExecutionRole
+
+  GetTweetCommentHandler:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: 'arn:aws:s3:::testtwittertest/AYGO-ARCHITECTURE-OF-MASSIVELY-DISTRIBUTED-APPLICATIONS-1.0-SNAPSHOT-shaded.jar'
+      FunctionName: GetTweetCommentHandler
+      MemorySize: 512
+      Handler: co.edu.escuelaing.twitter.handler.tweetComment.GetTweetCommentHandler
+      Role: 'arn:aws:iam::275101086977:role/LabRole'
+      Timeout: 20
+      Runtime: java11
+      Policies:
+        - AWSLambdaBasicExecutionRole
+        - AWSLambda_ReadOnlyAccess
+        - AWSXrayWriteOnlyAccess
+        - AWSLambdaVPCAccessExecutionRole
+
+  ListTweetCommentHandler:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: 'arn:aws:s3:::testtwittertest/AYGO-ARCHITECTURE-OF-MASSIVELY-DISTRIBUTED-APPLICATIONS-1.0-SNAPSHOT-shaded.jar'
+      FunctionName: ListTweetCommentHandler
+      MemorySize: 512
+      Handler: co.edu.escuelaing.twitter.handler.tweetComment.ListTweetCommentHandler
+      Role: 'arn:aws:iam::275101086977:role/LabRole'
+      Timeout: 20
+      Runtime: java11
+      Policies:
+        - AWSLambdaBasicExecutionRole
+        - AWSLambda_ReadOnlyAccess
+        - AWSXrayWriteOnlyAccess
+        - AWSLambdaVPCAccessExecutionRole
+
+  CreateTweetUserReactionHandler:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: 'arn:aws:s3:::testtwittertest/AYGO-ARCHITECTURE-OF-MASSIVELY-DISTRIBUTED-APPLICATIONS-1.0-SNAPSHOT-shaded.jar'
+      FunctionName: CreateTweetUserReactionHandler
+      MemorySize: 512
+      Handler: co.edu.escuelaing.twitter.handler.tweetUserReaction.CreateTweetUserReactionHandler
+      Role: 'arn:aws:iam::275101086977:role/LabRole'
+      Timeout: 20
+      Runtime: java11
+      Policies:
+        - AWSLambdaBasicExecutionRole
+        - AWSLambda_ReadOnlyAccess
+        - AWSXrayWriteOnlyAccess
+        - AWSLambdaVPCAccessExecutionRole
+
+  DeleteTweetUserReactionHandler:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: 'arn:aws:s3:::testtwittertest/AYGO-ARCHITECTURE-OF-MASSIVELY-DISTRIBUTED-APPLICATIONS-1.0-SNAPSHOT-shaded.jar'
+      FunctionName: DeleteTweetUserReactionHandler
+      MemorySize: 512
+      Handler: co.edu.escuelaing.twitter.handler.tweetUserReaction.DeleteTweetUserReactionHandler
+      Role: 'arn:aws:iam::275101086977:role/LabRole'
+      Timeout: 20
+      Runtime: java11
+      Policies:
+        - AWSLambdaBasicExecutionRole
+        - AWSLambda_ReadOnlyAccess
+        - AWSXrayWriteOnlyAccess
+        - AWSLambdaVPCAccessExecutionRole
+
+  GetTweetUserReactionHandler:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: 'arn:aws:s3:::testtwittertest/AYGO-ARCHITECTURE-OF-MASSIVELY-DISTRIBUTED-APPLICATIONS-1.0-SNAPSHOT-shaded.jar'
+      FunctionName: GetTweetUserReactionHandler
+      MemorySize: 512
+      Handler: co.edu.escuelaing.twitter.handler.tweetUserReaction.GetTweetUserReactionHandler
+      Role: 'arn:aws:iam::275101086977:role/LabRole'
+      Timeout: 20
+      Runtime: java11
+      Policies:
+        - AWSLambdaBasicExecutionRole
+        - AWSLambda_ReadOnlyAccess
+        - AWSXrayWriteOnlyAccess
+        - AWSLambdaVPCAccessExecutionRole
+
+  ListTweetUserReactionHandler:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: 'arn:aws:s3:::testtwittertest/AYGO-ARCHITECTURE-OF-MASSIVELY-DISTRIBUTED-APPLICATIONS-1.0-SNAPSHOT-shaded.jar'
+      FunctionName: ListTweetUserReactionHandler
+      MemorySize: 512
+      Handler: co.edu.escuelaing.twitter.handler.tweetUserReaction.ListTweetUserReactionHandler
+      Role: 'arn:aws:iam::275101086977:role/LabRole'
+      Timeout: 20
+      Runtime: java11
+      Policies:
+        - AWSLambdaBasicExecutionRole
+        - AWSLambda_ReadOnlyAccess
+        - AWSXrayWriteOnlyAccess
+        - AWSLambdaVPCAccessExecutionRole
+
+
+  TwitterApi:
+    Type: AWS::ApiGateway::RestApi
+    Properties:
+      ApiKeySourceType: HEADER
+      Description: An API Gateway with a Lambda Integration
+      EndpointConfiguration:
+        Types:
+          - EDGE
+      Name: TwitterApi
+
+  ApiGatewayResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      ParentId: !GetAtt TwitterApi.RootResourceId
+      PathPart: 'tweeter'
+      RestApiId: !Ref TwitterApi
+
+  ApiGatewayMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      ApiKeyRequired: false
+      AuthorizationType: NONE
+      HttpMethod: GET
+
+      Integration:
+
+        ConnectionType: INTERNET
+        IntegrationHttpMethod: GET
+        PassthroughBehavior: WHEN_NO_MATCH
+        TimeoutInMillis: 29000
+        Type: AWS_PROXY
+        Uri: !Sub 'arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${CreateUserHandler.Arn}/invocations'
+      OperationName: 'lambda'
+      ResourceId: !Ref ApiGatewayResource
+      RestApiId: !Ref TwitterApi
+
+  ApiGatewayModel:
+    Type: AWS::ApiGateway::Model
+    Properties:
+      ContentType: 'application/json'
+      RestApiId: !Ref TwitterApi
+      Schema: { }
+
+  ApiGatewayDeployment:
+    Type: AWS::ApiGateway::Deployment
+    DependsOn: ApiGatewayMethod
+    Properties:
+      Description: Lambda API Deployment
+      RestApiId: !Ref TwitterApi
+
+  ApiGatewayStage:
+    Type: AWS::ApiGateway::Stage
+    Properties:
+      DeploymentId: !Ref ApiGatewayDeployment
+      Description: Lambda API Stage v0
+      RestApiId: !Ref TwitterApi
+      StageName: 'v0'
+
+  ApiGatewayIamRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Sid: ''
+            Effect: 'Allow'
+            Principal:
+              Service:
+                - 'apigateway.amazonaws.com'
+            Action:
+              - 'sts:AssumeRole'
+      Path: '/'
+      Policies:
+        - PolicyName: LambdaAccess
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: 'Allow'
+                Action: 'lambda:*'
+                Resource: !GetAtt CreateUserHandler.Arn
