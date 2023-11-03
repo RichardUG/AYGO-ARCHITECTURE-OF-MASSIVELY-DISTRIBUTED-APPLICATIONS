@@ -1,13 +1,18 @@
 AWSTemplateFormatVersion: "2010-09-09"
 Description: "twiter"
 Transform: 'AWS::Serverless-2016-10-31'
+
 Resources:
 
   UserDynamoDBTable:
+
     Type: AWS::DynamoDB::Table
     Properties:
+      TableName: "User"
       AttributeDefinitions:
-        - AttributeName: "userName"
+        - AttributeName: "userid"
+          AttributeType: "S"
+        - AttributeName: "username"
           AttributeType: "S"
         - AttributeName: "email"
           AttributeType: "S"
@@ -16,95 +21,215 @@ Resources:
         - AttributeName: "nombre"
           AttributeType: "S"
       KeySchema:
-        - AttributeName: "userName"
-          KeyType: "String"
+        - AttributeName: "userid"
+          KeyType: "HASH"
+        - AttributeName: "username"
+          KeyType: "RANGE"
       ProvisionedThroughput:
-        ReadCapacityUnits: "5"
-        WriteCapacityUnits: "5"
-      TableName: "User"
-      GlobalSecondaryIndexes:
-        - IndexName: "emailKey"
+        ReadCapacityUnits: "1"
+        WriteCapacityUnits: "1"
+      LocalSecondaryIndexes:
+        - IndexName: "index_userid_username"
           KeySchema:
-            - AttributeName: "email"
-              KeyType: "String"
+            - AttributeName: "userid"
+              KeyType: "HASH"
+            - AttributeName: "username"
+              KeyType: "RANGE"
           Projection:
-            ProjectionType: "KEYS_ONLY"
-          ProvisionedThroughput:
-            ReadCapacityUnits: "5"
-            WriteCapacityUnits: "5"
+            ProjectionType: "ALL"
+        - IndexName: "index_userid_email"
+          KeySchema:
+            - AttributeName: "userid"
+              KeyType: "HASH"
+            - AttributeName: "email"
+              KeyType: "RANGE"
+          Projection:
+            ProjectionType: "ALL"
+        - IndexName: "index_userid_password"
+          KeySchema:
+            - AttributeName: "userid"
+              KeyType: "HASH"
+            - AttributeName: "password"
+              KeyType: "RANGE"
+          Projection:
+            ProjectionType: "ALL"
+        - IndexName: "index_userid_nombre"
+          KeySchema:
+            - AttributeName: "userid"
+              KeyType: "HASH"
+            - AttributeName: "nombre"
+              KeyType: "RANGE"
+          Projection:
+            ProjectionType: "ALL"
 
   TweetDynamoDBTable:
     Type: AWS::DynamoDB::Table
     DependsOn: "UserDynamoDBTable"
     Properties:
+      TableName: "Tweet"
       AttributeDefinitions:
-        - AttributeName: "idTweet"
+        - AttributeName: "idtweet"
           AttributeType: "S"
-        - AttributeName: "userName"
+        - AttributeName: "username"
           AttributeType: "S"
         - AttributeName: "comment"
           AttributeType: "S"
         - AttributeName: "date"
           AttributeType: "S"
       KeySchema:
-        - AttributeName: "idTweet"
-          KeyType: "Hash"
+        - AttributeName: "idtweet"
+          KeyType: "HASH"
+        - AttributeName: "username"
+          KeyType: "RANGE"
       ProvisionedThroughput:
-        ReadCapacityUnits: "5"
-        WriteCapacityUnits: "5"
-      TableName: "Tweet"
+        ReadCapacityUnits: "1"
+        WriteCapacityUnits: "1"
+      LocalSecondaryIndexes:
+        - IndexName: "index_idtweet_username"
+          KeySchema:
+            - AttributeName: "idtweet"
+              KeyType: "HASH"
+            - AttributeName: "username"
+              KeyType: "RANGE"
+          Projection:
+            ProjectionType: "ALL"
+        - IndexName: "index_idtweet_comment"
+          KeySchema:
+            - AttributeName: "idtweet"
+              KeyType: "HASH"
+            - AttributeName: "comment"
+              KeyType: "RANGE"
+          Projection:
+            ProjectionType: "ALL"
+        - IndexName: "index_idtweet_date"
+          KeySchema:
+            - AttributeName: "idtweet"
+              KeyType: "HASH"
+            - AttributeName: "date"
+              KeyType: "RANGE"
+          Projection:
+            ProjectionType: "ALL"
 
   TweetCommentDynamoDBTable:
     Type: AWS::DynamoDB::Table
     DependsOn: [ "UserDynamoDBTable",  "TweetDynamoDBTable" ]
     Properties:
+      TableName: "TweetComment"
       AttributeDefinitions:
-        - AttributeName: "idComment"
+        - AttributeName: "idcomment"
           AttributeType: "S"
-        - AttributeName: "idTweet"
+        - AttributeName: "idtweet"
           AttributeType: "S"
-        - AttributeName: "userName"
+        - AttributeName: "username"
           AttributeType: "S"
         - AttributeName: "comment"
           AttributeType: "S"
         - AttributeName: "date"
           AttributeType: "S"
       KeySchema:
-        - AttributeName: "idComment"
-          KeyType: "Hash"
+        - AttributeName: "idcomment"
+          KeyType: "HASH"
+        - AttributeName: "idtweet"
+          KeyType: "RANGE"
       ProvisionedThroughput:
-        ReadCapacityUnits: "5"
-        WriteCapacityUnits: "5"
-      TableName: "TweetComment"
+        ReadCapacityUnits: "1"
+        WriteCapacityUnits: "1"
+      LocalSecondaryIndexes:
+        - IndexName: "idtweet"
+          KeySchema:
+            - AttributeName: "idcomment"
+              KeyType: "HASH"
+            - AttributeName: "idtweet"
+              KeyType: "RANGE"
+          Projection:
+            ProjectionType: "ALL"
+        - IndexName: "index_idcomment_username"
+          KeySchema:
+            - AttributeName: "idcomment"
+              KeyType: "HASH"
+            - AttributeName: "username"
+              KeyType: "RANGE"
+          Projection:
+            ProjectionType: "ALL"
+        - IndexName: "index_idcomment_comment"
+          KeySchema:
+            - AttributeName: "idcomment"
+              KeyType: "HASH"
+            - AttributeName: "comment"
+              KeyType: "RANGE"
+          Projection:
+            ProjectionType: "ALL"
+        - IndexName: "index_idcomment_date"
+          KeySchema:
+            - AttributeName: "idcomment"
+              KeyType: "HASH"
+            - AttributeName: "date"
+              KeyType: "RANGE"
+          Projection:
+            ProjectionType: "ALL"
 
   TweetUserReactionDynamoDBTable:
     Type: AWS::DynamoDB::Table
     DependsOn: [ "UserDynamoDBTable",  "TweetDynamoDBTable" ]
     Properties:
+      TableName: "TweetUserReaction"
       AttributeDefinitions:
-        - AttributeName: "idTweet"
+        - AttributeName: "idtweet_user_reaction"
           AttributeType: "S"
-        - AttributeName: "userName"
+        - AttributeName: "idtweet"
+          AttributeType: "S"
+        - AttributeName: "username"
           AttributeType: "S"
         - AttributeName: "reaction"
           AttributeType: "S"
         - AttributeName: "date"
           AttributeType: "S"
       KeySchema:
-        - AttributeName: "idTweet"
-          KeyType: "Hash"
-        - AttributeName: "userName"
-          KeyType: "String"
+        - AttributeName: "idtweet_user_reaction"
+          KeyType: "HASH"
+        - AttributeName: "idtweet"
+          KeyType: "RANGE"
       ProvisionedThroughput:
-        ReadCapacityUnits: "5"
-        WriteCapacityUnits: "5"
-      TableName: "TweetUserReaction"
-
+        ReadCapacityUnits: "1"
+        WriteCapacityUnits: "1"
+      LocalSecondaryIndexes:
+        - IndexName: "index_idtweet_user_reaction_idtweet"
+          KeySchema:
+            - AttributeName: "idtweet_user_reaction"
+              KeyType: "HASH"
+            - AttributeName: "idtweet"
+              KeyType: "RANGE"
+          Projection:
+            ProjectionType: "ALL"
+        - IndexName: "index_idtweet_user_reaction_username"
+          KeySchema:
+            - AttributeName: "idtweet_user_reaction"
+              KeyType: "HASH"
+            - AttributeName: "username"
+              KeyType: "RANGE"
+          Projection:
+            ProjectionType: "ALL"
+        - IndexName: "index_idtweet_user_reaction_reaction"
+          KeySchema:
+            - AttributeName: "idtweet_user_reaction"
+              KeyType: "HASH"
+            - AttributeName: "reaction"
+              KeyType: "RANGE"
+          Projection:
+            ProjectionType: "ALL"
+        - IndexName: "index_idtweet_user_reaction_date"
+          KeySchema:
+            - AttributeName: "idtweet_user_reaction"
+              KeyType: "HASH"
+            - AttributeName: "date"
+              KeyType: "RANGE"
+          Projection:
+            ProjectionType: "ALL"
 
   CreateUserHandler:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: 'arn:aws:s3:::testtwittertest/AYGO-ARCHITECTURE-OF-MASSIVELY-DISTRIBUTED-APPLICATIONS-1.0-SNAPSHOT-shaded.jar'
+      CodeUri: 's3://twittertesttesttest/AYGO-ARCHITECTURE-OF-MASSIVELY-DISTRIBUTED-APPLICATIONS-1.0-SNAPSHOT.jar'
       FunctionName: CreateUserHandler
       MemorySize: 512
       Handler: co.edu.escuelaing.twitter.handler.user.CreateUserHandler
@@ -120,7 +245,7 @@ Resources:
   DeleteUserHandler:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: 'arn:aws:s3:::testtwittertest/AYGO-ARCHITECTURE-OF-MASSIVELY-DISTRIBUTED-APPLICATIONS-1.0-SNAPSHOT-shaded.jar'
+      CodeUri: 's3://twittertesttesttest/AYGO-ARCHITECTURE-OF-MASSIVELY-DISTRIBUTED-APPLICATIONS-1.0-SNAPSHOT.jar'
       FunctionName: DeleteUserHandler
       MemorySize: 512
       Handler: co.edu.escuelaing.twitter.handler.user.DeleteUserHandler
@@ -136,7 +261,7 @@ Resources:
   GetUser:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: 'arn:aws:s3:::testtwittertest/AYGO-ARCHITECTURE-OF-MASSIVELY-DISTRIBUTED-APPLICATIONS-1.0-SNAPSHOT-shaded.jar'
+      CodeUri: 's3://twittertesttesttest/AYGO-ARCHITECTURE-OF-MASSIVELY-DISTRIBUTED-APPLICATIONS-1.0-SNAPSHOT.jar'
       FunctionName: GetUserHandler
       MemorySize: 512
       Handler: co.edu.escuelaing.twitter.handler.user.GetUserHandler
@@ -152,7 +277,7 @@ Resources:
   ListUserHandler:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: 'arn:aws:s3:::testtwittertest/AYGO-ARCHITECTURE-OF-MASSIVELY-DISTRIBUTED-APPLICATIONS-1.0-SNAPSHOT-shaded.jar'
+      CodeUri: 's3://twittertesttesttest/AYGO-ARCHITECTURE-OF-MASSIVELY-DISTRIBUTED-APPLICATIONS-1.0-SNAPSHOT.jar'
       FunctionName: ListUserHandler
       MemorySize: 512
       Handler: co.edu.escuelaing.twitter.handler.user.ListUserHandler
@@ -168,7 +293,7 @@ Resources:
   CreateTweetHandler:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: 'arn:aws:s3:::testtwittertest/AYGO-ARCHITECTURE-OF-MASSIVELY-DISTRIBUTED-APPLICATIONS-1.0-SNAPSHOT-shaded.jar'
+      CodeUri: 's3://twittertesttesttest/AYGO-ARCHITECTURE-OF-MASSIVELY-DISTRIBUTED-APPLICATIONS-1.0-SNAPSHOT.jar'
       FunctionName: CreateTweetHandler
       MemorySize: 512
       Handler: co.edu.escuelaing.twitter.handler.tweet.CreateTweetHandler
@@ -184,7 +309,7 @@ Resources:
   DeleteTweet:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: 'arn:aws:s3:::testtwittertest/AYGO-ARCHITECTURE-OF-MASSIVELY-DISTRIBUTED-APPLICATIONS-1.0-SNAPSHOT-shaded.jar'
+      CodeUri: 's3://twittertesttesttest/AYGO-ARCHITECTURE-OF-MASSIVELY-DISTRIBUTED-APPLICATIONS-1.0-SNAPSHOT.jar'
       FunctionName: DeleteTweetHandler
       MemorySize: 512
       Handler: co.edu.escuelaing.twitter.handler.tweet.DeleteTweetHandler
@@ -200,7 +325,7 @@ Resources:
   GetTweetHandler:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: 'arn:aws:s3:::testtwittertest/AYGO-ARCHITECTURE-OF-MASSIVELY-DISTRIBUTED-APPLICATIONS-1.0-SNAPSHOT-shaded.jar'
+      CodeUri: 's3://twittertesttesttest/AYGO-ARCHITECTURE-OF-MASSIVELY-DISTRIBUTED-APPLICATIONS-1.0-SNAPSHOT.jar'
       FunctionName: GetTweetHandler
       MemorySize: 512
       Handler: co.edu.escuelaing.twitter.handler.tweet.GetTweetHandler
@@ -216,7 +341,7 @@ Resources:
   ListTweetHandler:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: 'arn:aws:s3:::testtwittertest/AYGO-ARCHITECTURE-OF-MASSIVELY-DISTRIBUTED-APPLICATIONS-1.0-SNAPSHOT-shaded.jar'
+      CodeUri: 's3://twittertesttesttest/AYGO-ARCHITECTURE-OF-MASSIVELY-DISTRIBUTED-APPLICATIONS-1.0-SNAPSHOT.jar'
       FunctionName: ListTweetHandler
       MemorySize: 512
       Handler: co.edu.escuelaing.twitter.handler.tweet.ListTweetHandler
@@ -232,7 +357,7 @@ Resources:
   CreateTweetCommentHandler:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: 'arn:aws:s3:::testtwittertest/AYGO-ARCHITECTURE-OF-MASSIVELY-DISTRIBUTED-APPLICATIONS-1.0-SNAPSHOT-shaded.jar'
+      CodeUri: 's3://twittertesttesttest/AYGO-ARCHITECTURE-OF-MASSIVELY-DISTRIBUTED-APPLICATIONS-1.0-SNAPSHOT.jar'
       FunctionName: CreateTweetCommentHandler
       MemorySize: 512
       Handler: co.edu.escuelaing.twitter.handler.tweetComment.CreateTweetCommentHandler
@@ -248,7 +373,7 @@ Resources:
   DeleteTweetCommentHandler:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: 'arn:aws:s3:::testtwittertest/AYGO-ARCHITECTURE-OF-MASSIVELY-DISTRIBUTED-APPLICATIONS-1.0-SNAPSHOT-shaded.jar'
+      CodeUri: 's3://twittertesttesttest/AYGO-ARCHITECTURE-OF-MASSIVELY-DISTRIBUTED-APPLICATIONS-1.0-SNAPSHOT.jar'
       FunctionName: DeleteTweetCommentHandler
       MemorySize: 512
       Handler: co.edu.escuelaing.twitter.handler.tweetComment.DeleteTweetCommentHandler
@@ -264,7 +389,7 @@ Resources:
   GetTweetCommentHandler:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: 'arn:aws:s3:::testtwittertest/AYGO-ARCHITECTURE-OF-MASSIVELY-DISTRIBUTED-APPLICATIONS-1.0-SNAPSHOT-shaded.jar'
+      CodeUri: 's3://twittertesttesttest/AYGO-ARCHITECTURE-OF-MASSIVELY-DISTRIBUTED-APPLICATIONS-1.0-SNAPSHOT.jar'
       FunctionName: GetTweetCommentHandler
       MemorySize: 512
       Handler: co.edu.escuelaing.twitter.handler.tweetComment.GetTweetCommentHandler
@@ -280,7 +405,7 @@ Resources:
   ListTweetCommentHandler:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: 'arn:aws:s3:::testtwittertest/AYGO-ARCHITECTURE-OF-MASSIVELY-DISTRIBUTED-APPLICATIONS-1.0-SNAPSHOT-shaded.jar'
+      CodeUri: 's3://twittertesttesttest/AYGO-ARCHITECTURE-OF-MASSIVELY-DISTRIBUTED-APPLICATIONS-1.0-SNAPSHOT.jar'
       FunctionName: ListTweetCommentHandler
       MemorySize: 512
       Handler: co.edu.escuelaing.twitter.handler.tweetComment.ListTweetCommentHandler
@@ -296,7 +421,7 @@ Resources:
   CreateTweetUserReactionHandler:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: 'arn:aws:s3:::testtwittertest/AYGO-ARCHITECTURE-OF-MASSIVELY-DISTRIBUTED-APPLICATIONS-1.0-SNAPSHOT-shaded.jar'
+      CodeUri: 's3://twittertesttesttest/AYGO-ARCHITECTURE-OF-MASSIVELY-DISTRIBUTED-APPLICATIONS-1.0-SNAPSHOT.jar'
       FunctionName: CreateTweetUserReactionHandler
       MemorySize: 512
       Handler: co.edu.escuelaing.twitter.handler.tweetUserReaction.CreateTweetUserReactionHandler
@@ -312,7 +437,7 @@ Resources:
   DeleteTweetUserReactionHandler:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: 'arn:aws:s3:::testtwittertest/AYGO-ARCHITECTURE-OF-MASSIVELY-DISTRIBUTED-APPLICATIONS-1.0-SNAPSHOT-shaded.jar'
+      CodeUri: 's3://twittertesttesttest/AYGO-ARCHITECTURE-OF-MASSIVELY-DISTRIBUTED-APPLICATIONS-1.0-SNAPSHOT.jar'
       FunctionName: DeleteTweetUserReactionHandler
       MemorySize: 512
       Handler: co.edu.escuelaing.twitter.handler.tweetUserReaction.DeleteTweetUserReactionHandler
@@ -328,7 +453,7 @@ Resources:
   GetTweetUserReactionHandler:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: 'arn:aws:s3:::testtwittertest/AYGO-ARCHITECTURE-OF-MASSIVELY-DISTRIBUTED-APPLICATIONS-1.0-SNAPSHOT-shaded.jar'
+      CodeUri: 's3://twittertesttesttest/AYGO-ARCHITECTURE-OF-MASSIVELY-DISTRIBUTED-APPLICATIONS-1.0-SNAPSHOT.jar'
       FunctionName: GetTweetUserReactionHandler
       MemorySize: 512
       Handler: co.edu.escuelaing.twitter.handler.tweetUserReaction.GetTweetUserReactionHandler
@@ -344,7 +469,7 @@ Resources:
   ListTweetUserReactionHandler:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: 'arn:aws:s3:::testtwittertest/AYGO-ARCHITECTURE-OF-MASSIVELY-DISTRIBUTED-APPLICATIONS-1.0-SNAPSHOT-shaded.jar'
+      CodeUri: 's3://twittertesttesttest/AYGO-ARCHITECTURE-OF-MASSIVELY-DISTRIBUTED-APPLICATIONS-1.0-SNAPSHOT.jar'
       FunctionName: ListTweetUserReactionHandler
       MemorySize: 512
       Handler: co.edu.escuelaing.twitter.handler.tweetUserReaction.ListTweetUserReactionHandler
@@ -416,25 +541,4 @@ Resources:
       RestApiId: !Ref TwitterApi
       StageName: 'v0'
 
-  ApiGatewayIamRole:
-    Type: AWS::IAM::Role
-    Properties:
-      AssumeRolePolicyDocument:
-        Version: '2012-10-17'
-        Statement:
-          - Sid: ''
-            Effect: 'Allow'
-            Principal:
-              Service:
-                - 'apigateway.amazonaws.com'
-            Action:
-              - 'sts:AssumeRole'
-      Path: '/'
-      Policies:
-        - PolicyName: LambdaAccess
-          PolicyDocument:
-            Version: '2012-10-17'
-            Statement:
-              - Effect: 'Allow'
-                Action: 'lambda:*'
-                Resource: !GetAtt CreateUserHandler.Arn
+  
