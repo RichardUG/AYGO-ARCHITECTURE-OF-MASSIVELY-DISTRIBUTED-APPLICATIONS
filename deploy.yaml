@@ -258,7 +258,7 @@ Resources:
         - AWSXrayWriteOnlyAccess
         - AWSLambdaVPCAccessExecutionRole
 
-  GetUser:
+  GetUserHandler:
     Type: AWS::Serverless::Function
     Properties:
       CodeUri: 's3://twittertesttesttest/AYGO-ARCHITECTURE-OF-MASSIVELY-DISTRIBUTED-APPLICATIONS-1.0-SNAPSHOT.jar'
@@ -306,7 +306,7 @@ Resources:
         - AWSXrayWriteOnlyAccess
         - AWSLambdaVPCAccessExecutionRole
 
-  DeleteTweet:
+  DeleteTweetHandler:
     Type: AWS::Serverless::Function
     Properties:
       CodeUri: 's3://twittertesttesttest/AYGO-ARCHITECTURE-OF-MASSIVELY-DISTRIBUTED-APPLICATIONS-1.0-SNAPSHOT.jar'
@@ -488,20 +488,168 @@ Resources:
     Properties:
       ApiKeySourceType: HEADER
       Description: An API Gateway with a Lambda Integration
+
       EndpointConfiguration:
         Types:
           - EDGE
       Name: TwitterApi
 
-  ApiGatewayResource:
+  ApiGatewayCreateUserResource:
     Type: AWS::ApiGateway::Resource
     Properties:
       ParentId: !GetAtt TwitterApi.RootResourceId
-      PathPart: 'tweeter'
+      PathPart: 'usercreate'
       RestApiId: !Ref TwitterApi
 
-  ApiGatewayMethod:
+  ApiGatewayDeleteUserResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      ParentId: !GetAtt TwitterApi.RootResourceId
+      PathPart: 'userdelete'
+      RestApiId: !Ref TwitterApi
+
+  ApiGatewayGetUserResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      ParentId: !GetAtt TwitterApi.RootResourceId
+      PathPart: 'userget'
+      RestApiId: !Ref TwitterApi
+
+  ApiGatewayListUserResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      ParentId: !GetAtt TwitterApi.RootResourceId
+      PathPart: 'userlist'
+      RestApiId: !Ref TwitterApi
+
+  ApiGatewayCreateTweetResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      ParentId: !GetAtt TwitterApi.RootResourceId
+      PathPart: 'tweetcreate'
+      RestApiId: !Ref TwitterApi
+
+  ApiGatewayDeleteTweetResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      ParentId: !GetAtt TwitterApi.RootResourceId
+      PathPart: 'tweetdelete'
+      RestApiId: !Ref TwitterApi
+
+  ApiGatewayGetTweetResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      ParentId: !GetAtt TwitterApi.RootResourceId
+      PathPart: 'tweetget'
+      RestApiId: !Ref TwitterApi
+
+  ApiGatewayListTweetResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      ParentId: !GetAtt TwitterApi.RootResourceId
+      PathPart: 'tweetlist'
+      RestApiId: !Ref TwitterApi
+
+  ApiGatewayCreateTweetCommentResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      ParentId: !GetAtt TwitterApi.RootResourceId
+      PathPart: 'tweetcommentcreate'
+      RestApiId: !Ref TwitterApi
+
+  ApiGatewayDeleteTweetCommentResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      ParentId: !GetAtt TwitterApi.RootResourceId
+      PathPart: 'tweetcommentdelete'
+      RestApiId: !Ref TwitterApi
+
+  ApiGatewayGetTweetCommentResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      ParentId: !GetAtt TwitterApi.RootResourceId
+      PathPart: 'tweetcommentget'
+      RestApiId: !Ref TwitterApi
+
+  ApiGatewayListTweetCommentResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      ParentId: !GetAtt TwitterApi.RootResourceId
+      PathPart: 'tweetcommentlist'
+      RestApiId: !Ref TwitterApi
+
+  ApiGatewayCreateTweetUserReactionResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      ParentId: !GetAtt TwitterApi.RootResourceId
+      PathPart: 'tweetuserreactioncreate'
+      RestApiId: !Ref TwitterApi
+
+  ApiGatewayDeleteTweetUserReactionResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      ParentId: !GetAtt TwitterApi.RootResourceId
+      PathPart: 'tweetuserreactiondelete'
+      RestApiId: !Ref TwitterApi
+
+  ApiGatewayGetTweetUserReactionResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      ParentId: !GetAtt TwitterApi.RootResourceId
+      PathPart: 'tweetuserreactionget'
+      RestApiId: !Ref TwitterApi
+
+  ApiGatewayListTweetUserReactionResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      ParentId: !GetAtt TwitterApi.RootResourceId
+      PathPart: 'tweetuserreactionlist'
+      RestApiId: !Ref TwitterApi
+
+
+  ApiGatewayCreateUser:
     Type: AWS::ApiGateway::Method
+    DependsOn: CreateUserHandler
+    Properties:
+      ApiKeyRequired: false
+      AuthorizationType: NONE
+      HttpMethod: POST
+
+      Integration:
+
+        ConnectionType: INTERNET
+        IntegrationHttpMethod: POST
+        PassthroughBehavior: WHEN_NO_MATCH
+        TimeoutInMillis: 29000
+        Type: AWS_PROXY
+        Uri: !Sub 'arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${CreateUserHandler.Arn}/invocations'
+      OperationName: 'CreateUser'
+      ResourceId: !Ref ApiGatewayCreateUserResource
+      RestApiId: !Ref TwitterApi
+
+  ApiGatewayDeleteUser:
+    Type: AWS::ApiGateway::Method
+    DependsOn: DeleteUserHandler
+    Properties:
+      ApiKeyRequired: false
+      AuthorizationType: NONE
+      HttpMethod: DELETE
+
+      Integration:
+
+        ConnectionType: INTERNET
+        IntegrationHttpMethod: DELETE
+        PassthroughBehavior: WHEN_NO_MATCH
+        TimeoutInMillis: 29000
+        Type: AWS_PROXY
+        Uri: !Sub 'arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${DeleteUserHandler.Arn}/invocations'
+      OperationName: 'DeleteUser'
+      ResourceId: !Ref ApiGatewayDeleteUserResource
+      RestApiId: !Ref TwitterApi
+
+  ApiGatewayGetUser:
+    Type: AWS::ApiGateway::Method
+    DependsOn: GetUserHandler
     Properties:
       ApiKeyRequired: false
       AuthorizationType: NONE
@@ -514,10 +662,273 @@ Resources:
         PassthroughBehavior: WHEN_NO_MATCH
         TimeoutInMillis: 29000
         Type: AWS_PROXY
-        Uri: !Sub 'arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${CreateUserHandler.Arn}/invocations'
-      OperationName: 'lambda'
-      ResourceId: !Ref ApiGatewayResource
+        Uri: !Sub 'arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${GetUserHandler.Arn}/invocations'
+      OperationName: 'GetUser'
+      ResourceId: !Ref ApiGatewayGetUserResource
       RestApiId: !Ref TwitterApi
+
+  ApiGatewayListUser:
+    Type: AWS::ApiGateway::Method
+    DependsOn: ListUserHandler
+    Properties:
+      ApiKeyRequired: false
+      AuthorizationType: NONE
+      HttpMethod: GET
+
+      Integration:
+
+        ConnectionType: INTERNET
+        IntegrationHttpMethod: GET
+        PassthroughBehavior: WHEN_NO_MATCH
+        TimeoutInMillis: 29000
+        Type: AWS_PROXY
+        Uri: !Sub 'arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${ListUserHandler.Arn}/invocations'
+      OperationName: 'ListUser'
+      ResourceId: !Ref ApiGatewayListUserResource
+      RestApiId: !Ref TwitterApi
+
+  ApiGatewayCreateTweet:
+    Type: AWS::ApiGateway::Method
+    DependsOn: CreateTweetHandler
+    Properties:
+      ApiKeyRequired: false
+      AuthorizationType: NONE
+      HttpMethod: POST
+
+      Integration:
+
+        ConnectionType: INTERNET
+        IntegrationHttpMethod: POST
+        PassthroughBehavior: WHEN_NO_MATCH
+        TimeoutInMillis: 29000
+        Type: AWS_PROXY
+        Uri: !Sub 'arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${CreateTweetHandler.Arn}/invocations'
+      OperationName: 'CreateTweet'
+      ResourceId: !Ref ApiGatewayCreateTweetResource
+      RestApiId: !Ref TwitterApi
+
+  ApiGatewayDeleteTweet:
+    Type: AWS::ApiGateway::Method
+    DependsOn: DeleteTweetHandler
+    Properties:
+      ApiKeyRequired: false
+      AuthorizationType: NONE
+      HttpMethod: DELETE
+
+      Integration:
+
+        ConnectionType: INTERNET
+        IntegrationHttpMethod: DELETE
+        PassthroughBehavior: WHEN_NO_MATCH
+        TimeoutInMillis: 29000
+        Type: AWS_PROXY
+        Uri: !Sub 'arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${DeleteTweetHandler.Arn}/invocations'
+      OperationName: 'DeleteTweet'
+      ResourceId: !Ref ApiGatewayDeleteTweetResource
+      RestApiId: !Ref TwitterApi
+
+  ApiGatewayGetTweet:
+    Type: AWS::ApiGateway::Method
+    DependsOn: GetTweetHandler
+    Properties:
+      ApiKeyRequired: false
+      AuthorizationType: NONE
+      HttpMethod: GET
+
+      Integration:
+
+        ConnectionType: INTERNET
+        IntegrationHttpMethod: GET
+        PassthroughBehavior: WHEN_NO_MATCH
+        TimeoutInMillis: 29000
+        Type: AWS_PROXY
+        Uri: !Sub 'arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${GetTweetHandler.Arn}/invocations'
+      OperationName: 'GetTweet'
+      ResourceId: !Ref ApiGatewayGetTweetResource
+      RestApiId: !Ref TwitterApi
+
+  ApiGatewayListTweet:
+    Type: AWS::ApiGateway::Method
+    DependsOn: ListTweetHandler
+    Properties:
+      ApiKeyRequired: false
+      AuthorizationType: NONE
+      HttpMethod: GET
+
+      Integration:
+
+        ConnectionType: INTERNET
+        IntegrationHttpMethod: GET
+        PassthroughBehavior: WHEN_NO_MATCH
+        TimeoutInMillis: 29000
+        Type: AWS_PROXY
+        Uri: !Sub 'arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${ListTweetHandler.Arn}/invocations'
+      OperationName: 'ListTweet'
+      ResourceId: !Ref ApiGatewayListTweetResource
+      RestApiId: !Ref TwitterApi
+
+  ApiGatewayCreateTweetComment:
+    Type: AWS::ApiGateway::Method
+    DependsOn: CreateTweetCommentHandler
+    Properties:
+      ApiKeyRequired: false
+      AuthorizationType: NONE
+      HttpMethod: POST
+
+      Integration:
+
+        ConnectionType: INTERNET
+        IntegrationHttpMethod: POST
+        PassthroughBehavior: WHEN_NO_MATCH
+        TimeoutInMillis: 29000
+        Type: AWS_PROXY
+        Uri: !Sub 'arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${CreateTweetCommentHandler.Arn}/invocations'
+      OperationName: 'CreateTweetCommentHandler'
+      ResourceId: !Ref ApiGatewayCreateTweetCommentResource
+      RestApiId: !Ref TwitterApi
+
+  ApiGatewayDeleteTweetComment:
+    Type: AWS::ApiGateway::Method
+    DependsOn: DeleteTweetCommentHandler
+    Properties:
+      ApiKeyRequired: false
+      AuthorizationType: NONE
+      HttpMethod: DELETE
+
+      Integration:
+
+        ConnectionType: INTERNET
+        IntegrationHttpMethod: DELETE
+        PassthroughBehavior: WHEN_NO_MATCH
+        TimeoutInMillis: 29000
+        Type: AWS_PROXY
+        Uri: !Sub 'arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${DeleteTweetCommentHandler.Arn}/invocations'
+      OperationName: 'DeleteTweetComment'
+      ResourceId: !Ref ApiGatewayDeleteTweetCommentResource
+      RestApiId: !Ref TwitterApi
+
+  ApiGatewayGetTweetComment:
+    Type: AWS::ApiGateway::Method
+    DependsOn: GetTweetCommentHandler
+    Properties:
+      ApiKeyRequired: false
+      AuthorizationType: NONE
+      HttpMethod: GET
+
+      Integration:
+
+        ConnectionType: INTERNET
+        IntegrationHttpMethod: GET
+        PassthroughBehavior: WHEN_NO_MATCH
+        TimeoutInMillis: 29000
+        Type: AWS_PROXY
+        Uri: !Sub 'arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${GetTweetCommentHandler.Arn}/invocations'
+      OperationName: 'GetTweetComment'
+      ResourceId: !Ref ApiGatewayGetTweetCommentResource
+      RestApiId: !Ref TwitterApi
+
+  ApiGatewayListTweetComment:
+    Type: AWS::ApiGateway::Method
+    DependsOn: ListTweetCommentHandler
+    Properties:
+      ApiKeyRequired: false
+      AuthorizationType: NONE
+      HttpMethod: GET
+
+      Integration:
+
+        ConnectionType: INTERNET
+        IntegrationHttpMethod: GET
+        PassthroughBehavior: WHEN_NO_MATCH
+        TimeoutInMillis: 29000
+        Type: AWS_PROXY
+        Uri: !Sub 'arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${ListTweetCommentHandler.Arn}/invocations'
+      OperationName: 'ListTweetComment'
+      ResourceId: !Ref ApiGatewayListTweetCommentResource
+      RestApiId: !Ref TwitterApi
+
+  ApiGatewayCreateTweetUserReaction:
+    Type: AWS::ApiGateway::Method
+    DependsOn: CreateTweetUserReactionHandler
+    Properties:
+      ApiKeyRequired: false
+      AuthorizationType: NONE
+      HttpMethod: POST
+
+      Integration:
+
+        ConnectionType: INTERNET
+        IntegrationHttpMethod: POST
+        PassthroughBehavior: WHEN_NO_MATCH
+        TimeoutInMillis: 29000
+        Type: AWS_PROXY
+        Uri: !Sub 'arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${CreateTweetUserReactionHandler.Arn}/invocations'
+      OperationName: 'CreateTweetUserReaction'
+      ResourceId: !Ref ApiGatewayCreateTweetUserReactionResource
+      RestApiId: !Ref TwitterApi
+
+  ApiGatewayDeleteTweetUserReaction:
+    Type: AWS::ApiGateway::Method
+    DependsOn: DeleteTweetUserReactionHandler
+    Properties:
+      ApiKeyRequired: false
+      AuthorizationType: NONE
+      HttpMethod: DELETE
+
+      Integration:
+
+        ConnectionType: INTERNET
+        IntegrationHttpMethod: DELETE
+        PassthroughBehavior: WHEN_NO_MATCH
+        TimeoutInMillis: 29000
+        Type: AWS_PROXY
+        Uri: !Sub 'arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${DeleteTweetUserReactionHandler.Arn}/invocations'
+      OperationName: 'DeleteTweetUserReaction'
+      ResourceId: !Ref ApiGatewayDeleteTweetUserReactionResource
+      RestApiId: !Ref TwitterApi
+
+  ApiGatewayGetTweetUserReaction:
+    Type: AWS::ApiGateway::Method
+    DependsOn: GetTweetUserReactionHandler
+    Properties:
+      ApiKeyRequired: false
+      AuthorizationType: NONE
+      HttpMethod: GET
+
+      Integration:
+
+        ConnectionType: INTERNET
+        IntegrationHttpMethod: GET
+        PassthroughBehavior: WHEN_NO_MATCH
+        TimeoutInMillis: 29000
+        Type: AWS_PROXY
+        Uri: !Sub 'arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${GetTweetUserReactionHandler.Arn}/invocations'
+      OperationName: 'GetTweetUserReaction'
+      ResourceId: !Ref ApiGatewayGetTweetUserReactionResource
+      RestApiId: !Ref TwitterApi
+
+  ApiGatewayListTweetUserReaction:
+    Type: AWS::ApiGateway::Method
+    DependsOn: ListTweetUserReactionHandler
+    Properties:
+
+      ApiKeyRequired: false
+      AuthorizationType: NONE
+      HttpMethod: GET
+
+      Integration:
+
+        ConnectionType: INTERNET
+        IntegrationHttpMethod: GET
+        PassthroughBehavior: WHEN_NO_MATCH
+        TimeoutInMillis: 29000
+        Type: AWS_PROXY
+        Uri: !Sub 'arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${ListTweetUserReactionHandler.Arn}/invocations'
+      OperationName: 'ListTweetUserReaction'
+      ResourceId: !Ref ApiGatewayListTweetUserReactionResource
+      RestApiId: !Ref TwitterApi
+
+
 
   ApiGatewayModel:
     Type: AWS::ApiGateway::Model
@@ -528,17 +939,20 @@ Resources:
 
   ApiGatewayDeployment:
     Type: AWS::ApiGateway::Deployment
-    DependsOn: ApiGatewayMethod
+    DependsOn: [ApiGatewayCreateUser, ApiGatewayDeleteUser, ApiGatewayGetUser, ApiGatewayListUser, ApiGatewayCreateTweet, ApiGatewayDeleteTweet, ApiGatewayGetTweet, ApiGatewayListTweet, ApiGatewayCreateTweetComment,ApiGatewayDeleteTweetComment, ApiGatewayGetTweetComment, ApiGatewayListTweetComment, ApiGatewayCreateTweetUserReaction,ApiGatewayDeleteTweetUserReaction, ApiGatewayGetTweetUserReaction, ApiGatewayListTweetUserReaction]
     Properties:
       Description: Lambda API Deployment
       RestApiId: !Ref TwitterApi
+      StageName: 'twitter'
 
-  ApiGatewayStage:
+  ApiGatewayTweeterStage:
     Type: AWS::ApiGateway::Stage
     Properties:
       DeploymentId: !Ref ApiGatewayDeployment
-      Description: Lambda API Stage v0
+      Description: Lambda API Stage twitter
       RestApiId: !Ref TwitterApi
-      StageName: 'v0'
+      StageName: 'twittertest'
+
+
 
   
